@@ -15,6 +15,7 @@ module geofence (clk,
   reg [2:0] next_state ;
   reg [2:0] current_state ;
 
+  integer i=0;
   parameter IDLE         = 3'd0;
   parameter RD_DATA      = 3'd1;
   parameter POSITION_CAL = 3'd2;
@@ -42,13 +43,15 @@ module geofence (clk,
   wire rd_data;
   wire position_cal;
   wire det_inside;
+  wire done;
 
   assign counter_wire = !position_cal ? 3'd0 : iteration_clear ? counter_reg + 3'd1 : counter_reg;
 
   assign rd_data_done_flag      = (counter_reg == 3'd5);
   assign position_cal_done_flag = (counter_reg == 3'd4 && position_cal);
-  assign rd_data                = (current_state == RD_DATA);
   assign iteration_clear        = (pointer_reg == 3'd5);
+  assign det_inside_done_flag = (counter_reg == 3'd5 && det_inside);
+
   wire [9:0]cross_product_in_ref_point_x;
   wire [9:0]cross_product_in_ref_point_y;
 
@@ -58,10 +61,10 @@ module geofence (clk,
   wire[9:0] cross_product_in_input_point_2_x;
   wire[9:0] cross_product_in_input_point_2_y;
 
-  assign det_inside_done_flag = (counter_reg == 3'd5 && det_inside);
+  assign rd_data                = (current_state == RD_DATA);
   assign position_cal         = (current_state == POSITION_CAL);
   assign det_inside           = (current_state == DET_INSIDE);
-
+  assign done                 = (current_state == DONE);
   //counter_reg
   always @(posedge clk or posedge reset)
   begin
@@ -82,11 +85,12 @@ module geofence (clk,
       pointer_reg <= 3'd2;
     else if (position_cal)
       pointer_reg <= (iteration_clear) ? counter_wire + 3'd1 : pointer_reg + 3'd1;
-    else 
+    else
       pointer_reg <= 3'd2;
   end
 
-  always @(posedge clk or posedge reset) begin
+  always @(posedge clk or posedge reset)
+  begin
     current_state <= (reset) ? IDLE : next_state ;
   end
 
@@ -100,7 +104,7 @@ module geofence (clk,
       POSITION_CAL:
         next_state = (counter_reg == 3'd4) ? DET_INSIDE : POSITION_CAL;
       DET_INSIDE:
-        next_state = (counter_reg == 3'd4) ? DET_INSIDE : DONE;
+        next_state = (counter_reg == 3'd5) ? DET_INSIDE : DONE;
       DONE:
         next_state = IDLE;
       default:
@@ -109,7 +113,7 @@ module geofence (clk,
   end
 
   /*----------RD_DATA----------*/
-  integer i;
+
   always @(posedge clk or posedge reset)
   begin
     if (reset)
@@ -166,5 +170,8 @@ module geofence (clk,
 
   assign cross_out = cross_result > 0;
 
+  /*------------DONE----------------*/
+  assign valid = (done) ? 1 : 0;
+  assign is_inside = (done) ? (cross_out ? 1 : 0) : 0;
 
 endmodule
