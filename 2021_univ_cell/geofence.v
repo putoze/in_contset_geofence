@@ -42,6 +42,7 @@ module geofence (clk,
     reg [2:0] pointer_reg;
     reg [19:0] position_reg[0:5];
     reg [19:0] test_point_reg;
+    reg is_inside_flag_reg;
 
     wire [2:0] counter_wire;
 
@@ -236,15 +237,15 @@ module geofence (clk,
 
     assign cross_out = cross_result > 0;
 
-    reg is_inside_flag;
+
 
     always @(posedge clk or posedge reset)
     begin
-        is_inside_flag <= reset ? 0 : state_IDLE ? 0 : cross_out & det_inside_done_flag ? 1 : is_inside_flag;
+        is_inside_flag_reg <= reset ? 0 : state_IDLE ? 0 : cross_out & det_inside_done_flag ? 1 : is_inside_flag_reg;
     end
 
     /*------------DONE----------------*/
     assign valid     = (state_DONE) ? 1 : 0;
-    assign is_inside = (state_DONE) ? (is_inside_flag ? 1 : 0) : 0;
+    assign is_inside = (state_DONE) ? (is_inside_flag_reg ? 1 : 0) : 0;
 
 endmodule
