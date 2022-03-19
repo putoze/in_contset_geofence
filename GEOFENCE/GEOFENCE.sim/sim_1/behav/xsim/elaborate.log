@@ -4,4 +4,11 @@ Running: D:/vivado/Vivado/2018.2/bin/unwrapped/win64.o/xelab.exe -wto 09995c89db
 Using 2 slave threads.
 Starting static elaboration
 Completed static elaboration
-INFO: [XSIM 43-4323] No Change in HDL. Linking previously generated obj files to create kernel
+Starting simulation data flow analysis
+WARNING: [XSIM 43-4099] "C:/Users/kim09/IC_contest/GEOFENCE/2021_univ_cell/geofence.v" Line 1. Module geofence doesn't have a timescale but at least one module in design has a timescale.
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module xil_defaultlib.geofence
+Compiling module xil_defaultlib.testfixture
+Compiling module xil_defaultlib.glbl
+Built simulation snapshot testfixture_behav
