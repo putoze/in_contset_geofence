@@ -1,4 +1,4 @@
-module geofence ( clk,reset,X,Y,valid,is_inside);
+module geofence (clk,reset,X,Y,valid,is_inside);
   input clk;
   input reset;
   input [9:0] X;
@@ -24,7 +24,6 @@ module geofence ( clk,reset,X,Y,valid,is_inside);
   assign rd_data_done_flag = (counter_reg == 3'd7);
   assign rd_data = (current_state == RD_DATA);
 
-
   always @(posedge clk or posedge reset)
   begin
     if(reset)
@@ -43,15 +42,18 @@ module geofence ( clk,reset,X,Y,valid,is_inside);
   begin
     case (current_state)
       IDLE:
-        next_state = (!reset) ? RD_data : IDLE;
+        next_state = (!reset) ? RD_DATA : IDLE;
       RD_DATA:
         next_state = (rd_data_done_flag) ? POSITION_CAL : RD_DATA;
       POSITION_CAL:
-        next_state = ;
+        next_state = (counter_reg == 3'd5) ? DET_INSIDE : POSITION_CAL;
       DET_INSIDE:
-        DONE:
-          default:
-          endcase
+        next_state = (counter_reg == 3'd5) ? DET_INSIDE : DONE;
+      DONE:
+        next_state = IDLE;
+      default:
+        next_state = IDLE;
+    endcase
   end
 
   /*----------RD_DATA----------*/
