@@ -167,7 +167,7 @@ module geofence (clk,
         else
         begin
             if (state_POSITION_CAL)
-            begin
+            begin //SWAPPING
                 position_reg[counter_reg] <= cross_out ? position_reg[pointer_reg] : position_reg[counter_reg];
                 position_reg[pointer_reg] <= cross_out ? position_reg[counter_reg] : position_reg[pointer_reg];
             end
@@ -198,6 +198,12 @@ module geofence (clk,
     end
     endgenerate
 
+    //is_inside_flag
+    always @(posedge clk or posedge reset)
+    begin
+        is_inside_flag_reg <= reset ? 0 : state_IDLE ? 0 : cross_out & det_inside_done_flag ? 1 : is_inside_flag_reg;
+    end
+
     /*--------CROSS_PRODUCT INPUTS---------*/
     always @(*)
     begin
@@ -224,6 +230,7 @@ module geofence (clk,
         endcase
     end
 
+
     /*------------CROSS PRODUCT----------*/
     assign {cross_product_in_input_point_1_x,cross_product_in_input_point_1_y} = cross_product_in_input_point_1;
     assign {cross_product_in_input_point_2_x,cross_product_in_input_point_2_y} = cross_product_in_input_point_2;
@@ -238,11 +245,6 @@ module geofence (clk,
     assign cross_out = cross_result > 0;
 
 
-
-    always @(posedge clk or posedge reset)
-    begin
-        is_inside_flag_reg <= reset ? 0 : state_IDLE ? 0 : cross_out & det_inside_done_flag ? 1 : is_inside_flag_reg;
-    end
 
     /*------------DONE----------------*/
     assign valid     = (state_DONE) ? 1 : 0;
