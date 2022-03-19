@@ -177,19 +177,6 @@ module geofence (clk,
         endcase
     end
 
-    /*------------CROSS PRODUCT----------*/
-    assign {cross_product_in_input_point_1_x,cross_product_in_input_point_1_y} = cross_product_in_input_point_1;
-    assign {cross_product_in_input_point_2_x,cross_product_in_input_point_2_y} = cross_product_in_input_point_2;
-    assign {cross_product_in_ref_point_x,cross_product_in_ref_point_y}         = cross_product_in_ref_point;
-
-
-    assign cross_result = (cross_product_in_input_point_1_x - cross_product_in_ref_point_x)
-    *(cross_product_in_input_point_2_y-cross_product_in_ref_point_y)
-    - (cross_product_in_input_point_2_x-cross_product_in_ref_point_x)
-    *(cross_product_in_input_point_1_y - cross_product_in_ref_point_y);
-
-    assign cross_out = cross_result > 0;
-
     /*--------CROSS_PRODUCT INPUTS---------*/
     always @(*)
     begin
