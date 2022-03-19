@@ -34,7 +34,7 @@ module geofence (clk,
   reg [19:0]cross_product_in_ref_point ;
   reg [19:0]cross_product_in_input_point_1;
   reg [19:0]cross_product_in_input_point_2;
-  wire signed [19:0]cross_result;
+  wire signed [20:0]cross_result;
   wire cross_out;
 
   //Registers
@@ -216,16 +216,15 @@ module geofence (clk,
       end
       DET_INSIDE:
       begin
-        cross_product_in_input_point_1 = test_point_reg;
-        cross_product_in_input_point_2 = (counter_reg == 5) ? position_reg[0]: position_reg[counter_reg+1];
-        cross_product_in_ref_point     = position_reg[counter_reg];
+        cross_product_in_input_point_1 = (counter_reg == 5) ? position_reg[0]: position_reg[counter_reg+'d1];
+        cross_product_in_input_point_2 = position_reg[counter_reg];
+        cross_product_in_ref_point     = test_point_reg;
       end
-
       default:
       begin
-        cross_product_in_input_point_1 = 0;
-        cross_product_in_input_point_2 = 0;
-        cross_product_in_ref_point     = 0;
+        cross_product_in_input_point_1 = 'd0;
+        cross_product_in_input_point_2 = 'd0;
+        cross_product_in_ref_point     = 'd0;
       end
     endcase
   end
@@ -238,11 +237,11 @@ module geofence (clk,
 
 
   assign cross_result = (cross_product_in_input_point_1_x - cross_product_in_ref_point_x)
-         *(cross_product_in_input_point_2_y-cross_product_in_ref_point_y)
-         - (cross_product_in_input_point_2_x-cross_product_in_ref_point_x)
+         *(cross_product_in_input_point_2_y - cross_product_in_ref_point_y)
+         - (cross_product_in_input_point_2_x  -cross_product_in_ref_point_x)
          *(cross_product_in_input_point_1_y - cross_product_in_ref_point_y);
 
-  assign cross_out = cross_result > 0;
+  assign cross_out = cross_result >= 0;
 
 
 
