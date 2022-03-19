@@ -66,7 +66,7 @@ module geofence (clk,
     assign state_RD_DATA      = (current_state == RD_DATA);
     assign state_POSITION_CAL = (current_state == POSITION_CAL);
     assign state_DET_INSIDE   = (current_state == DET_INSIDE);
-    assign state_DONE        = (current_state == DONE);
+    assign state_DONE         = (current_state == DONE);
     //counter_reg
     always @(posedge clk or posedge reset)
     begin
@@ -200,116 +200,116 @@ module geofence (clk,
     assign {cross_product_in_input_point_2_x,cross_product_in_input_point_2_y} = cross_product_in_input_point_2;
     assign {cross_product_in_ref_point_x,cross_product_in_ref_point_y}         = cross_product_in_ref_point;
 
-  assign {test_x,test_y} = test_point_reg;
+    assign {test_x,test_y} = test_point_reg;
 
-  //position_reg
-  always @(posedge clk)
-  begin
-    if (reset)
+    //position_reg
+    always @(posedge clk)
     begin
-      for(i = 0;i<6;i = i+1)
-      begin
-        position_reg[i] <= 20'd0;
-      end
-    end
-    else if (state_IDLE)
-    begin
-      for(i = 0;i<6;i = i+1)
-      begin
-        position_reg[i] <= 20'd0;
-      end
-    end
-    else if (state_RD_DATA)
-      position_reg [counter_reg] <= {X,Y};
-    else
-    begin
-      if (state_POSITION_CAL)
-      begin //SWAPPING
-        position_reg[counter_reg] <= cross_out ? position_reg[pointer_reg] : position_reg[counter_reg];
-        position_reg[pointer_reg] <= cross_out ? position_reg[counter_reg] : position_reg[pointer_reg];
-      end
-      else
-      begin
-        for(i = 0;i<6;i = i+1)
+        if (reset)
         begin
-          position_reg[i] <= position_reg[i];
+            for(i = 0;i<6;i = i+1)
+            begin
+                position_reg[i] <= 20'd0;
+            end
         end
-      end
+        else if (state_IDLE)
+        begin
+            for(i = 0;i<6;i = i+1)
+            begin
+                position_reg[i] <= 20'd0;
+            end
+        end
+            else if (state_RD_DATA)
+            position_reg [counter_reg] <= {X,Y};
+        else
+        begin
+            if (state_POSITION_CAL)
+            begin //SWAPPING
+                position_reg[counter_reg] <= cross_out ? position_reg[pointer_reg] : position_reg[counter_reg];
+                position_reg[pointer_reg] <= cross_out ? position_reg[counter_reg] : position_reg[pointer_reg];
+            end
+            else
+            begin
+                for(i = 0;i<6;i = i+1)
+                begin
+                    position_reg[i] <= position_reg[i];
+                end
+            end
+        end
     end
-  end
 
-  //test_point_reg
-  always @(posedge clk or posedge reset)
-  begin
-    test_point_reg <= reset ? 20'd0 : state_IDLE ? {X,Y} : test_point_reg;
-  end
+    //test_point_reg
+    always @(posedge clk or posedge reset)
+    begin
+        test_point_reg <= reset ? 20'd0 : state_IDLE ? {X,Y} : test_point_reg;
+    end
 
-  wire [9:0] temp_x[0:5];
-  wire [9:0] temp_y[0:5];
+    wire [9:0] temp_x[0:5];
+    wire [9:0] temp_y[0:5];
 
-  genvar j;
-  generate
+    genvar j;
+    generate
     for(j = 0 ; j<6 ; j = j+1)
     begin
-      assign {temp_x[j],temp_y[j]} = position_reg[j];
+        assign {temp_x[j],temp_y[j]} = position_reg[j];
     end
-  endgenerate
+    endgenerate
 
-  reg is_inside_flag_reg;
+    reg is_inside_flag_reg;
 
-  //is_inside_flag
-  always @(posedge clk or posedge reset)
-  begin
-    is_inside_flag_reg <= reset ? 0 : state_IDLE ? 0 : cross_out & det_inside_done_flag ? 1 : is_inside_flag_reg;
-  end
+    //is_inside_flag
+    always @(posedge clk or posedge reset)
+    begin
+        is_inside_flag_reg <= reset ? 0 : state_IDLE ? 0 : cross_out & det_inside_done_flag ? 1 : is_inside_flag_reg;
+    end
 
-  /*--------CROSS_PRODUCT INPUTS---------*/
-  always @(*)
-  begin
-    case(current_state)
-      POSITION_CAL:
-      begin
-        cross_product_in_input_point_1 = position_reg[counter_reg];
-        cross_product_in_input_point_2 = position_reg[pointer_reg];
-        cross_product_in_ref_point     = position_reg[0];
-      end
-      DET_INSIDE:
-      begin
-        cross_product_in_input_point_1 = test_point_reg;
-        cross_product_in_input_point_2 = (counter_reg == 5) ? position_reg[0]: position_reg[counter_reg+1];
-        cross_product_in_ref_point     = position_reg[counter_reg];
-      end
+    /*--------CROSS_PRODUCT INPUTS---------*/
+    always @(*)
+    begin
+        case(current_state)
+            POSITION_CAL:
+            begin
+                cross_product_in_input_point_1 = position_reg[counter_reg];
+                cross_product_in_input_point_2 = position_reg[pointer_reg];
+                cross_product_in_ref_point     = position_reg[0];
+            end
+            DET_INSIDE:
+            begin
+                cross_product_in_input_point_1 = test_point_reg;
+                cross_product_in_input_point_2 = (counter_reg == 5) ? position_reg[0]: position_reg[counter_reg+1];
+                cross_product_in_ref_point     = position_reg[counter_reg];
+            end
 
-      default:
-      begin
-        cross_product_in_input_point_1 = 0;
-        cross_product_in_input_point_2 = 0;
-        cross_product_in_ref_point     = 0;
-      end
-    endcase
-  end
-
-
-  /*------------CROSS PRODUCT----------*/
-  assign {cross_product_in_input_point_1_x,cross_product_in_input_point_1_y} = cross_product_in_input_point_1;
-  assign {cross_product_in_input_point_2_x,cross_product_in_input_point_2_y} = cross_product_in_input_point_2;
-  assign {cross_product_in_ref_point_x,cross_product_in_ref_point_y}         = cross_product_in_ref_point;
+            default:
+            begin
+                cross_product_in_input_point_1 = 0;
+                cross_product_in_input_point_2 = 0;
+                cross_product_in_ref_point     = 0;
+            end
+        endcase
+    end
 
 
-  assign cross_result = (cross_product_in_input_point_1_x - cross_product_in_ref_point_x)
-         *(cross_product_in_input_point_2_y-cross_product_in_ref_point_y)
-         - (cross_product_in_input_point_2_x-cross_product_in_ref_point_x)
-         *(cross_product_in_input_point_1_y - cross_product_in_ref_point_y);
+    /*------------CROSS PRODUCT----------*/
+    assign {cross_product_in_input_point_1_x,cross_product_in_input_point_1_y} = cross_product_in_input_point_1;
+    assign {cross_product_in_input_point_2_x,cross_product_in_input_point_2_y} = cross_product_in_input_point_2;
+    assign {cross_product_in_ref_point_x,cross_product_in_ref_point_y}         = cross_product_in_ref_point;
 
-  assign cross_out = cross_result > 0;
+
+    assign cross_result = (cross_product_in_input_point_1_x - cross_product_in_ref_point_x)
+    *(cross_product_in_input_point_2_y-cross_product_in_ref_point_y)
+    - (cross_product_in_input_point_2_x-cross_product_in_ref_point_x)
+    *(cross_product_in_input_point_1_y - cross_product_in_ref_point_y);
+
+    assign cross_out = cross_result > 0;
 
     /*------------DONE----------------*/
     assign valid     = (done) ? 1 : 0;
     assign is_inside = (done) ? (cross_out ? 1 : 0) : 0;
 
 
-  /*------------DONE----------------*/
-  assign valid     = (state_DONE) ? 1 : 0;
-  assign is_inside = (state_DONE) ? (is_inside_flag_reg ? 1 : 0) : 0;
+    /*------------DONE----------------*/
+    assign valid     = (state_DONE) ? 1 : 0;
+    assign is_inside = (state_DONE) ? (is_inside_flag_reg ? 1 : 0) : 0;
 
 endmodule
