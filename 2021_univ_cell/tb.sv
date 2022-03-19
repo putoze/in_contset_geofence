@@ -2,7 +2,7 @@
 `define CYCLE      30.0  
 `define SDFFILE    "./geofence_syn.sdf"
 `define End_CYCLE  1000000
-`define PAT        "univ.data"
+`define PAT        "C:/Users/kim09/IC_contest/GEOFENCE/2021_univ_cell/univ.data"
 
 module testfixture();
 integer fd;
@@ -32,12 +32,13 @@ geofence u_geofence(.clk(clk),
 `endif
 
 always begin #(`CYCLE/2) clk = ~clk; end
-
+/*
 initial begin
     $fsdbDumpfile("geofence.fsdb");
     $fsdbDumpvars();
     $fsdbDumpMDA;
 end
+*/
 
 //initial begin
 //    $dumpfile("geofence.vcd");

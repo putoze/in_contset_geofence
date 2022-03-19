@@ -1,4 +1,4 @@
-module geofence(clk,
+module geofence (clk,
                  reset,
                  X,
                  Y,
@@ -42,30 +42,23 @@ module geofence(clk,
     reg [19:0] position_reg[0:5];
     reg [19:0] test_point_reg;
 
+    /*-----------------Flags--------------------*/
+    wire [2:0] counter_wire;
     wire rd_data_done_flag;
     wire position_cal_done_flag;
     wire det_inside_done_flag;
     wire iteration_clear;
 
-
-    wire rd_data;
-    wire position_cal;
-    wire det_inside;
-
-    assign counter_wire = !position_cal ? 3'd0 : iteration_clear ? counter_reg + 3'd1 : counter_reg;
-
-    assign rd_data_done_flag      = (counter_reg == 3'd5);
-    assign position_cal_done_flag = (counter_reg == 3'd4 && position_cal);
-    assign rd_data                = (current_state == RD_DATA);
-    assign iteration_clear        = (pointer_reg == 3'd5);
-
+    wire state_rd_data;
+    wire state_position_cal;
+    wire state_det_inside;
 
     assign counter_wire = iteration_clear ? 3'd0 : counter_reg + 3'd1;
 
     assign rd_data_done_flag      = (counter_reg == 3'd6);
-    assign position_cal_done_flag = (counter_reg == 3'd5 && position_cal);
+    assign position_cal_done_flag = (counter_reg == 3'd5 && state_position_cal);
     assign iteration_clear        = (pointer_reg == 3'd5);
-    assign det_inside_done_flag   = (counter_reg == 3'd5 && det_inside);
+    assign det_inside_done_flag   = (counter_reg == 3'd5 && state_det_inside);
 
     assign state_rd_data      = (current_state == RD_DATA);
     assign state_position_cal = (current_state == POSITION_CAL);
@@ -78,7 +71,7 @@ module geofence(clk,
         begin
             counter_reg <= 3'd0;
         end
-        else if (det_inside)
+        else if (state_det_inside)
         begin
             counter_reg <= det_inside_done_flag ? 3'd0 : counter_reg + 3'd1;
         end
@@ -86,7 +79,7 @@ module geofence(clk,
             begin
             counter_reg <= position_cal_done_flag ? 3'd0 : counter_wire;
             end
-            else if (rd_data)
+            else if (state_rd_data)
             begin
             counter_reg <= rd_data_done_flag ? 3'd1 : counter_reg + 3'd1;
             end
@@ -100,15 +93,17 @@ module geofence(clk,
     always @(posedge clk or posedge reset)
     begin
         if (reset)
-            pointer_reg <= 3'd2;
-        else if (position_cal)
-            pointer_reg <= (iteration_clear) ? counter_wire + 3'd1 : pointer_reg + 3'd1;
+            pointer_reg <= 3'd0;
+        else if (state_position_cal)
+            pointer_reg <= (iteration_clear) ? counter_wire : pointer_reg + 3'd1;
         else
-            pointer_reg <= 3'd2;
+        begin
+            pointer_reg <= pointer_reg;
+        end
     end
 
-    //FSM
-    always @(posedge clk or posedge reset) begin
+    always @(posedge clk or posedge reset)
+    begin
         current_state <= (reset) ? IDLE : next_state ;
     end
 
@@ -120,9 +115,9 @@ module geofence(clk,
             RD_DATA:
             next_state = (rd_data_done_flag) ? POSITION_CAL : RD_DATA;
             POSITION_CAL:
-            next_state = (counter_reg == 3'd4) ? DET_INSIDE : POSITION_CAL;
+            next_state = (counter_reg == 3'd5) ? DET_INSIDE : POSITION_CAL;
             DET_INSIDE:
-            next_state = (counter_reg == 3'd4) ? DET_INSIDE : DONE;
+            next_state = (counter_reg == 3'd5) ? DET_INSIDE : DONE;
             DONE:
             next_state = IDLE;
             default:
@@ -140,14 +135,60 @@ module geofence(clk,
             begin
                 position_reg[i] <= 20'd0;
             end
-            test_point_reg <= 20'd0;
         end
+        else if (state_rd_data)
+        begin
+            position_reg [counter_reg] <= {X,Y};
+        end
+            else if (current_state == IDLE)
+            begin
+            test_point_reg <= {X,Y};
+            end
         else
         begin
-            test_point_reg <= test_point_reg;
+            position_reg[counter_reg] <= position_reg[counter_reg];
         end
     end
 
+
+    /*--------CROSS_PRODUCT INPUTS---------*/
+    always @(*)
+    begin
+        case(current_state)
+            POSITION_CAL:
+            begin
+                cross_product_in_input_point_1 = position_reg[counter_reg];
+                cross_product_in_input_point_2 = position_reg[pointer_reg];
+                cross_product_in_ref_point     = position_reg[0];
+            end
+            DET_INSIDE:
+            begin
+                cross_product_in_input_point_1 = test_point_reg;
+                cross_product_in_input_point_2 = position_reg[counter_reg];
+                cross_product_in_ref_point     = position_reg[0];
+            end
+
+            default:
+            begin
+                cross_product_in_input_point_1 = 0;
+                cross_product_in_input_point_2 = 0;
+                cross_product_in_ref_point     = 0;
+            end
+        endcase
+    end
+
+    /*------------CROSS PRODUCT----------*/
+    assign {cross_product_in_input_point_1_x,cross_product_in_input_point_1_y} = cross_product_in_input_point_1;
+    assign {cross_product_in_input_point_2_x,cross_product_in_input_point_2_y} = cross_product_in_input_point_2;
+    assign {cross_product_in_ref_point_x,cross_product_in_ref_point_y}         = cross_product_in_ref_point;
+
+
+    assign cross_result = (cross_product_in_input_point_1_x - cross_product_in_ref_point_x)
+    *(cross_product_in_input_point_2_y-cross_product_in_ref_point_y)
+    - (cross_product_in_input_point_2_x-cross_product_in_ref_point_x)
+    *(cross_product_in_input_point_1_y - cross_product_in_ref_point_y);
+
+    assign cross_out = cross_result > 0;
 
     /*--------CROSS_PRODUCT INPUTS---------*/
     always @(*)
