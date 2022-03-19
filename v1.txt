@@ -83,7 +83,6 @@ module geofence (clk,
     else
       counter_reg <= counter_reg;
   end
-  //lol//
 
   //pointer_reg
   always @(posedge clk or posedge reset)
