@@ -43,10 +43,10 @@ module geofence (clk,
   wire position_cal;
   wire det_inside;
 
-  assign counter_wire = iteration_clear ? 3'd0 : counter_reg + 3'd1;
+  assign counter_wire = !position_cal ? 3'd0 : iteration_clear ? counter_reg + 3'd1 : counter_reg;
 
-  assign rd_data_done_flag      = (counter_reg == 3'd6);
-  assign position_cal_done_flag = (counter_reg == 3'd5 && position_cal);
+  assign rd_data_done_flag      = (counter_reg == 3'd5);
+  assign position_cal_done_flag = (counter_reg == 3'd4 && position_cal);
   assign rd_data                = (current_state == RD_DATA);
   assign iteration_clear        = (pointer_reg == 3'd5);
   wire [9:0]cross_product_in_ref_point_x;
@@ -79,9 +79,11 @@ module geofence (clk,
   always @(posedge clk or posedge reset)
   begin
     if (reset)
-      pointer_reg <= 3'd0;
+      pointer_reg <= 3'd2;
     else if (position_cal)
-      pointer_reg <= (iteration_clear) ? counter_wire : pointer_reg + 3'd1;
+      pointer_reg <= (iteration_clear) ? counter_wire + 3'd1 : pointer_reg + 3'd1;
+    else 
+      pointer_reg <= 3'd2;
   end
 
   always @(posedge clk or posedge reset) begin
@@ -96,9 +98,9 @@ module geofence (clk,
       RD_DATA:
         next_state = (rd_data_done_flag) ? POSITION_CAL : RD_DATA;
       POSITION_CAL:
-        next_state = (counter_reg == 3'd5) ? DET_INSIDE : POSITION_CAL;
+        next_state = (counter_reg == 3'd4) ? DET_INSIDE : POSITION_CAL;
       DET_INSIDE:
-        next_state = (counter_reg == 3'd5) ? DET_INSIDE : DONE;
+        next_state = (counter_reg == 3'd4) ? DET_INSIDE : DONE;
       DONE:
         next_state = IDLE;
       default:
@@ -116,6 +118,7 @@ module geofence (clk,
       begin
         position_reg[i] <= 20'd0;
       end
+      test_point_reg <= 20'd0;
     end
     else if (rd_data)
       position_reg [counter_reg] <= {X,Y};
