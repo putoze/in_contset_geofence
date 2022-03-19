@@ -93,13 +93,13 @@ module geofence (clk,
                     begin
                         cross_product_in_input_point_1 = postion_reg[counter_reg];
                         cross_product_in_input_point_2 = postion_reg[pointer_reg];
-                        cross_product_in_ref_point     = postion_reg[1];
+                        cross_product_in_ref_point     = postion_reg[0];
                     end
                     DET_INSIDE:
                     begin
-                        cross_product_in_input_point_1 = postion_reg[0];
+                        cross_product_in_input_point_1 = test_point_reg;
                         cross_product_in_input_point_2 = position_reg[counter_reg];
-                        cross_product_in_ref_point     = postion_reg[1];
+                        cross_product_in_ref_point     = postion_reg[0];
                     end
 
                     default:
@@ -123,10 +123,6 @@ module geofence (clk,
             *(cross_product_in_input_point_1_y - cross_product_in_ref_point_y);
 
             assign cross_out = cross_result > 0;
-
-
-
-
 
 
             endmodule
