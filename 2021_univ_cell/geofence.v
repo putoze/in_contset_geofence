@@ -125,7 +125,7 @@ module geofence (clk,
     end
 
     /*----------RD_DATA----------*/
-    wire[9:0] test_x,test_y;
+    //wire[9:0] test_x,test_y;
 
 
     //assign {test_x,test_y} = test_point_reg;
