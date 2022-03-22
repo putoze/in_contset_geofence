@@ -31,11 +31,11 @@ module geofence (clk,
     wire[9:0] cross_product_in_input_point_2_x;
     wire[9:0] cross_product_in_input_point_2_y;
 
-  reg [19:0]cross_product_in_ref_point ;
-  reg [19:0]cross_product_in_input_point_1;
-  reg [19:0]cross_product_in_input_point_2;
-  wire signed [20:0]cross_result;
-  wire cross_out;
+    reg [19:0]cross_product_in_ref_point ;
+    reg [19:0]cross_product_in_input_point_1;
+    reg [19:0]cross_product_in_input_point_2;
+    wire signed [20:0]cross_result;
+    wire cross_out;
 
     //Registers
     reg [2:0] counter_reg;
@@ -225,12 +225,12 @@ module geofence (clk,
     assign {cross_product_in_ref_point_x,cross_product_in_ref_point_y}         = cross_product_in_ref_point;
 
 
-  assign cross_result = (cross_product_in_input_point_1_x - cross_product_in_ref_point_x)
-         *(cross_product_in_input_point_2_y - cross_product_in_ref_point_y)
-         - (cross_product_in_input_point_2_x  -cross_product_in_ref_point_x)
-         *(cross_product_in_input_point_1_y - cross_product_in_ref_point_y);
+    assign cross_result = (cross_product_in_input_point_1_x - cross_product_in_ref_point_x)
+    *(cross_product_in_input_point_2_y - cross_product_in_ref_point_y)
+    - (cross_product_in_input_point_2_x  -cross_product_in_ref_point_x)
+    *(cross_product_in_input_point_1_y - cross_product_in_ref_point_y);
 
-  assign cross_out = cross_result >= 0;
+    assign cross_out = cross_result >= 0;
 
     /*------------DONE----------------*/
     assign valid     = (state_DONE) ? 1 : 0;
