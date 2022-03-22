@@ -73,7 +73,7 @@ module geofence (clk,
     assign state_DONE         = (current_state == DONE);
 
 
-    //counter_reg
+    //-counter_reg
     always @(posedge clk or posedge reset)
     begin
         if (reset)
@@ -90,7 +90,7 @@ module geofence (clk,
             counter_reg <= counter_reg;
     end
 
-    //pointer_reg
+    //-pointer_reg
     always @(posedge clk or posedge reset)
     begin
         if (reset)
@@ -101,6 +101,7 @@ module geofence (clk,
             pointer_reg <= 3'd2;
     end
 
+    //-MAIN_CTR
     always @(posedge clk or posedge reset)
     begin
         current_state <= (reset) ? IDLE : next_state ;
@@ -130,7 +131,7 @@ module geofence (clk,
 
     //assign {test_x,test_y} = test_point_reg;
 
-    //position_reg
+    //-position_reg
     always @(posedge clk)
     begin
         if (reset)
@@ -166,7 +167,7 @@ module geofence (clk,
         end
     end
 
-    //test_point_reg
+    //-test_point_reg
     always @(posedge clk or posedge reset)
     begin
         test_point_reg <= reset ? 20'd0 : state_IDLE ? {X,Y} : test_point_reg;
@@ -185,7 +186,7 @@ module geofence (clk,
      endgenerate
      */
 
-    //is_inside_flag
+    //-is_inside_flag_reg
     always @(posedge clk or posedge reset)
     begin
         is_inside_flag_reg <= reset ? 0 : state_IDLE ? 0 : cross_out & det_inside_done_flag ? 1 : is_inside_flag_reg;
