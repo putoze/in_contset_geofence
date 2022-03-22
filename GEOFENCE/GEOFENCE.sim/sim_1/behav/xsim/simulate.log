@@ -261,7 +261,7 @@ Scenario26(in):     X     Y
            AP4:   321,  127
            AP5:   321,  870
            AP6:   567, 1003
-Object26: Golde/Return => 1/0, FAIL
+Object26: Golde/Return => 1/1, PASS
 
 Scenario27(out):    X     Y
         Object:   500,  800
@@ -469,41 +469,4 @@ Scenario47(out):    X     Y
            AP2:   300,  800
            AP3:   400,   80
            AP4:   130,  210
-           AP5:   710,  620
-           AP6:   980,  120
-Object47: Golde/Return => 0/0, PASS
-
-Scenario48(in):     X     Y
-        Object:   500,  675
-           AP1:   321,  870
-           AP2:  1010,  643
-           AP3:   321,  127
-           AP4:   567, 1003
-           AP5:   432,  123
-           AP6:   970,  280
-Object48: Golde/Return => 1/1, PASS
-
-Scenario49(out):    X     Y
-        Object:   100,  100
-           AP1:   567, 1003
-           AP2:  1010,  643
-           AP3:   321,  127
-           AP4:   432,  123
-           AP5:   321,  870
-           AP6:   970,  280
-Object49: Golde/Return => 0/0, PASS
-
-Scenario50(out):    X     Y
-        Object:   321, 1000
-           AP1:   321,  870
-           AP2:   432,  123
-           AP3:   970,  280
-           AP4:   567, 1003
-           AP5:   321,  127
-           AP6:  1010,  643
-Object50: Golde/Return => 0/0, PASS
-
--------------------------------------------------
--- Simulation finish,  Pass = 49 , Fail =  1   --
--------------------------------------------------
-$finish called at time : 33240 ns : File "C:/Users/kim09/IC_contest/GEOFENCE/2021_univ_cell/tb.sv" Line 150
+           AP5:
